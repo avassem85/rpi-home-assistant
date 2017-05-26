@@ -1,6 +1,8 @@
 FROM lroguet/rpi-home-assistant:0.45.1
 MAINTAINER Alex van Assem <avassem@gmail.com>
 
+RUN [ "cross-build-start" ]
+
 # Base layer
 ENV ARCH=arm
 ENV CROSS_COMPILE=/usr/bin/
@@ -18,3 +20,5 @@ COPY requirements_all.txt requirements_all.txt
 RUN pip3 install -vvv --upgrade setuptools && \
     pip3 install -vvv --no-cache-dir -r requirements_all.txt && \
     pip3 install -vvv --no-cache-dir mysqlclient psycopg2 uvloop cchardet
+
+RUN [ "cross-build-end" ] 
