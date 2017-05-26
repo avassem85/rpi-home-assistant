@@ -1,0 +1,53 @@
+#!/bin/bash
+# Install requirements and build dependencies for Home Assistant in Docker.
+
+# Stop on errors
+set -e
+
+# Required debian packages for running hass or components
+PACKAGES=(
+  # build-essential is required for python pillow module on non-x86_64 arch
+  build-essential
+  # homeassistant.components.image_processing.openalpr_local
+  libxrandr-dev
+  # homeassistant.components.device_tracker.nmap_tracker
+  nmap net-tools libcurl3-dev
+  # homeassistant.components.device_tracker.bluetooth_tracker
+  bluetooth libglib2.0-dev libbluetooth-dev
+  # homeassistant.components.device_tracker.owntracks
+  libsodium13
+  # homeassistant.components.zwave
+  libudev-dev
+  # homeassistant.components.media_player.frontier_silicon
+  libxml2-dev libxslt1-dev
+  # homeassistant.components.sensor.sensehat
+  # homeassistant.components.light.sensehat
+  libjpeg-dev
+)
+
+# Required debian packages for building dependencies
+PACKAGES_DEV=(
+  cmake git
+  # libcec
+  swig
+)
+
+# Install packages
+apt-get update
+apt-get install -y --no-install-recommends ${PACKAGES[@]} ${PACKAGES_DEV[@]}
+
+if [ "$INSTALL_OPENALPR" == "yes" ]; then
+  scripts/install_openalpr
+fi
+
+if [ "$INSTALL_COAP_CLIENT" == "yes" ]; then
+  scripts/install_coap_client
+fi
+
+# Remove packages
+apt-get remove -y --purge ${PACKAGES_DEV[@]}
+apt-get -y --purge autoremove
+
+# Cleanup
+apt-get clean
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* build/
