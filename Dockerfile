@@ -1,12 +1,10 @@
-FROM lroguet/rpi-home-assistant:0.45.1
+FROM resin/raspberrypi3-python:3
 MAINTAINER Alex van Assem <avassem@gmail.com>
 
-RUN [ "cross-build-start" ]
-
 # Base layer
-ENV ARCH=arm
-ENV CROSS_COMPILE=/usr/bin/
-ENV DEBIAN_FRONTEND=noninteractive
+# ENV ARCH=arm
+# ENV CROSS_COMPILE=/usr/bin/
+# ENV DEBIAN_FRONTEND=noninteractive
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -15,10 +13,18 @@ WORKDIR /usr/src/app
 COPY scripts/ scripts/
 RUN scripts/install_prereqs
 
-# Install hass component dependencies
-COPY requirements_all.txt requirements_all.txt
-RUN pip3 install -vvv --upgrade setuptools && \
-    pip3 install -vvv --no-cache-dir -r requirements_all.txt && \
-    pip3 install -vvv --no-cache-dir mysqlclient psycopg2 uvloop cchardet
+# Install Home Assistant
+RUN pip install --upgrade pip
+RUN pip install -v --upgrade setuptools
+RUN pip install homeassistant==0.45.1
 
-RUN [ "cross-build-end" ] 
+# Install hass component dependencies
+# COPY requirements_all.txt requirements_all.txt
+# RUN pip install -v --no-cache-dir -r requirements_all.txt && \
+#     pip install -v --no-cache-dir mysqlclient psycopg2 uvloop cchardet
+
+# Mouting point for the user's configuration
+VOLUME /config
+
+# Start Home Assistant
+CMD [ "python", "-m", "homeassistant", "--config", "/config" ]

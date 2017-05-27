@@ -6,10 +6,18 @@ set -e
 
 # Required debian packages for running hass or components
 PACKAGES=(
+  # python
+  python3-dev
   # build-essential is required for python pillow module on non-x86_64 arch
   build-essential
+  # homeassistant.components.switch.wake_on_lan
+  iputils-ping
+  # homeassistant.components.notify.html5
+  libffi-dev libpython-dev libssl-dev
   # homeassistant.components.image_processing.openalpr_local
   libxrandr-dev
+  # homeassistant.components.device_tracker.asuswrt
+  ssh
   # homeassistant.components.device_tracker.nmap_tracker
   nmap net-tools libcurl3-dev
   # homeassistant.components.device_tracker.bluetooth_tracker
@@ -23,11 +31,15 @@ PACKAGES=(
   # homeassistant.components.sensor.sensehat
   # homeassistant.components.light.sensehat
   libjpeg-dev
+  # homeassistant.components.recorder
+  libmysqlclient-dev libpq-dev
 )
 
 # Required debian packages for building dependencies
 PACKAGES_DEV=(
   cmake git
+  wget
+  curl
   # libcec
   swig
 )
@@ -36,13 +48,9 @@ PACKAGES_DEV=(
 apt-get update
 apt-get install -y --no-install-recommends ${PACKAGES[@]} ${PACKAGES_DEV[@]}
 
-if [ "$INSTALL_OPENALPR" == "yes" ]; then
-  scripts/install_openalpr
-fi
-
-if [ "$INSTALL_COAP_CLIENT" == "yes" ]; then
-  scripts/install_coap_client
-fi
+# Run installation scripts
+scripts/install_openalpr
+scripts/install_coap_client
 
 # Remove packages
 apt-get remove -y --purge ${PACKAGES_DEV[@]}
